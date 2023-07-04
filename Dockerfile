@@ -13,8 +13,8 @@ RUN dnf -y update && \
     dnf -y install python3 python3-pip git && \
     dnf clean all
 
-# Install Django globally
-RUN pip3 install django
+# Install pip packages
+RUN pip3 install django boto3 django-storages
 
 # Create a non-root user
 RUN adduser klaatubaradanikto
