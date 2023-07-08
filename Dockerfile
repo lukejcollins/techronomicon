@@ -14,7 +14,7 @@ RUN dnf -y update && \
     dnf clean all
 
 # Install pip packages
-RUN pip3 install django boto3 django-storages
+RUN pip3 install django boto3 django-storages psycopg2-binary
 
 # Create a non-root user
 RUN adduser klaatubaradanikto
