@@ -28,8 +28,5 @@ WORKDIR /home/klaatubaradanikto
 # Copy project in to Docker container
 COPY techronomicon /home/klaatubaradanikto
 
-# Change directory to app directory
-WORKDIR /home/klaatubaradanikto/techronomicon
-
 # Run server with gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "techronomicon.wsgi:application"]
