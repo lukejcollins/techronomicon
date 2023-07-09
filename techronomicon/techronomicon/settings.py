@@ -12,6 +12,19 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+import boto3
+from botocore.exceptions import NoCredentialsError
+
+def get_parameter(name):
+    # Create SSM Client
+    ssm = session.client('ssm', region_name='eu-west-1')
+
+    try:
+        response = ssm.get_parameter(Name=name, WithDecryption=True)
+    except NoCredentialsError:
+        return None
+
+    return response['Parameter']['Value']
 
 # Load environment variables from .env file for local development
 env_path = os.path.join(os.path.dirname(__file__), '..', '.env')
@@ -22,12 +35,12 @@ if os.path.exists(env_path):
             os.environ[key] = value
 
 # Use the environment variable for the secret key
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') if os.path.exists(env_path) else get_parameter('DJANGO_SECRET_KEY')
 
 # AWS static setup
-AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY')
-AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+TECHRONOMICON_ACCESS_KEY_ID = os.environ.get('TECHRONOMICON_ACCESS_KEY') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_ACCESS_KEY')
+TECHRONOMICON_SECRET_ACCESS_KEY = os.environ.get('TECHRONOMICON_SECRET_ACCESS_KEY') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_SECRET_ACCESS_KEY')
+TECHRONOMICON_STORAGE_BUCKET_NAME = os.environ.get('TECHRONOMICON_STORAGE_BUCKET_NAME') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_STORAGE_BUCKET_NAME')
 AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
@@ -97,10 +110,10 @@ WSGI_APPLICATION = 'techronomicon.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.environ.get('AWS_RDS_DB_NAME'),
-        'USER': os.environ.get('AWS_RDS_USERNAME'),
-        'PASSWORD': os.environ.get('AWS_RDS_PASSWORD'),
-        'HOST': os.environ.get('AWS_RDS_HOST'),
+        'NAME': os.environ.get('TECHRONOMICON_RDS_DB_NAME') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_RDS_DB_NAME'),
+        'USER': os.environ.get('TECHRONOMICON_RDS_USERNAME') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_RDS_USERNAME'),
+        'PASSWORD': os.environ.get('TECHRONOMICON_RDS_PASSWORD') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_RDS_PASSWORD'),
+        'HOST': os.environ.get('TECHRONOMICON_RDS_HOST') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_RDS_HOST'),
         'PORT': '5432',
     }
 }
