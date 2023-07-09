@@ -1,9 +1,6 @@
 # Use the latest Amazon Linux image
 FROM amazonlinux:latest
 
-# Maintainer information
-LABEL maintainer="luke.collins@live.co.uk"
-
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
