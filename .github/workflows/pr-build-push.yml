@@ -2,6 +2,9 @@ name: techronomicon-build-pr
 
 on:
   pull_request:
+    paths:
+      - Dockerfile
+      - 'techronomicon/**'
 
 permissions:
   packages: write
@@ -9,8 +12,6 @@ permissions:
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-    outputs:
-      dockerfile_modified: ${{ steps.check_changes.outputs.modified }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
