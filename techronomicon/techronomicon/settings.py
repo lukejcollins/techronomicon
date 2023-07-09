@@ -16,7 +16,10 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 
 def get_parameter(name):
-    # Create SSM Client
+    # Create a session
+    session = boto3.Session()
+
+    # Create SSM client
     ssm = session.client('ssm', region_name='eu-west-1')
 
     try:
