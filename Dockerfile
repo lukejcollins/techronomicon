@@ -1,7 +1,7 @@
 # Use the latest Amazon Linux image
 FROM amazonlinux:latest
 
-# Maintainer information (optional)
+# Maintainer information
 LABEL maintainer="luke.collins@live.co.uk"
 
 # Set environment variables
@@ -14,7 +14,7 @@ RUN dnf -y update && \
     dnf clean all
 
 # Install pip packages
-RUN pip3 install django boto3 django-storages psycopg2-binary
+RUN pip3 install django boto3 django-storages psycopg2-binary gunicorn
 
 # Create a non-root user
 RUN adduser klaatubaradanikto
@@ -25,5 +25,11 @@ USER klaatubaradanikto
 # Set the working directory
 WORKDIR /home/klaatubaradanikto
 
-# Make project directory
-RUN mkdir techronomicon
+# Copy project in to Docker container
+COPY techronomicon /home/klaatubaradanikto
+
+# Change directory to app directory
+WORKDIR /home/klaatubaradanikto/techronomicon
+
+# Run server with gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "techronomicon.wsgi:application"]
