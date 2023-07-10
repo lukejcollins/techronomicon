@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Update the package list and install necessary packages
 RUN dnf -y update && \
-    dnf -y install python3 python3-pip git && \
+    dnf -y install python3 python3-pip git iputils && \
     dnf clean all
 
 # Install pip packages
