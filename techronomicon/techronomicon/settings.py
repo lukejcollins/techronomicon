@@ -16,7 +16,10 @@ import boto3
 from botocore.exceptions import NoCredentialsError
 
 def get_parameter(name):
-    # Create SSM Client
+    # Create a session
+    session = boto3.Session()
+
+    # Create SSM client
     ssm = session.client('ssm', region_name='eu-west-1')
 
     try:
@@ -38,10 +41,10 @@ if os.path.exists(env_path):
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') if os.path.exists(env_path) else get_parameter('DJANGO_SECRET_KEY')
 
 # AWS static setup
-TECHRONOMICON_ACCESS_KEY_ID = os.environ.get('TECHRONOMICON_ACCESS_KEY') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_ACCESS_KEY')
+TECHRONOMICON_ACCESS_KEY_ID = os.environ.get('TECHRONOMICON_ACCESS_KEY_ID') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_ACCESS_KEY_ID')
 TECHRONOMICON_SECRET_ACCESS_KEY = os.environ.get('TECHRONOMICON_SECRET_ACCESS_KEY') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_SECRET_ACCESS_KEY')
 TECHRONOMICON_STORAGE_BUCKET_NAME = os.environ.get('TECHRONOMICON_STORAGE_BUCKET_NAME') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_STORAGE_BUCKET_NAME')
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % TECHRONOMICON_STORAGE_BUCKET_NAME
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
@@ -58,7 +61,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['0.0.0.0']
+ALLOWED_HOSTS = ['34.244.180.26']
 
 
 # Application definition

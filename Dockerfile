@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED 1
 
 # Update the package list and install necessary packages
 RUN dnf -y update && \
-    dnf -y install python3 python3-pip git && \
+    dnf -y install python3 python3-pip git iputils && \
     dnf clean all
 
 # Install pip packages
@@ -25,5 +25,5 @@ WORKDIR /home/klaatubaradanikto
 # Copy project in to Docker container
 COPY techronomicon /home/klaatubaradanikto
 
-# Run server with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "techronomicon.wsgi:application"]
+# Run server with gunicorn server
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "600", "techronomicon.wsgi:application"]
