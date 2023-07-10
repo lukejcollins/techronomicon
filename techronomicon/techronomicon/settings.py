@@ -44,7 +44,7 @@ SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') if os.path.exists(env_path) els
 TECHRONOMICON_ACCESS_KEY_ID = os.environ.get('TECHRONOMICON_ACCESS_KEY_ID') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_ACCESS_KEY_ID')
 TECHRONOMICON_SECRET_ACCESS_KEY = os.environ.get('TECHRONOMICON_SECRET_ACCESS_KEY') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_SECRET_ACCESS_KEY')
 TECHRONOMICON_STORAGE_BUCKET_NAME = os.environ.get('TECHRONOMICON_STORAGE_BUCKET_NAME') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_STORAGE_BUCKET_NAME')
-AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % TECHRONOMICON_AWS_STORAGE_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % TECHRONOMICON_STORAGE_BUCKET_NAME
 AWS_S3_OBJECT_PARAMETERS = {
     'CacheControl': 'max-age=86400',
 }
