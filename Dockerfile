@@ -26,5 +26,4 @@ WORKDIR /home/klaatubaradanikto
 COPY techronomicon /home/klaatubaradanikto
 
 # Run server with gunicorn server
-# CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "600", "techronomicon.wsgi:application"]
-CMD ["ping", "google.com"]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "600", "techronomicon.wsgi:application"]
