@@ -1,3 +1,8 @@
+[![Django](https://img.shields.io/badge/Django-Web%20Framework-092E20?logo=django&logoColor=white&labelColor=092E20&color=white)](https://www.djangoproject.com/) [![Docker](https://img.shields.io/badge/Docker-Containerisation-2496ED?logo=docker&logoColor=white&labelColor=2496ED&color=white)](https://www.docker.com/) ![Deployment](https://github.com/lukejcollins/techronomicon/actions/workflows/pr-build-push.yml/badge.svg)
+
+
+
+
 # Techronomicon 🧙‍♂️🔮
 
 Welcome to the Techronomicon, a mystical portal where technology meets the arcane! Techronomicon will be a tech blog focused on Immutable OSs, cloud infrastructure and a blend of other esoteric miscellanea. Our words of power are weaved with Python and Django, while our scrolls are stored in the great libraries of AWS. 🌩️📚
@@ -8,7 +13,7 @@ As of now, the mighty spellbook contains the basic foundation of a Django projec
 
 - The **Dockerfile** is capable of conjuring a container that can run the Django site. It’s just a prototype and will evolve as the secrets of the arcane get unraveled.
   
-- The **Django project** is in its nascent form, resembling an alchemist’s first draft of a potion. It currently holds the Django test page, as if peering through a looking glass into a world yet to be fully formed. 
+- The **Django project** is in its nascent form, resembling an alchemist’s first draft of a potion. It currently holds a basic blog page, as if peering through a looking glass into a world yet to be fully formed. 
 
 Remember, fellow practitioner, that these are mere beginnings. As the moon goes through its phases, so will Techronomicon. Through the coming weeks and months, we will embark on a mystical journey, adding new spells, summoning new entities, and drawing from the well of ancient knowledge.🌟
 
