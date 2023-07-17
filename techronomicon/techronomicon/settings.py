@@ -37,6 +37,8 @@ if os.path.exists(env_path):
             key, value = line.strip().split('=', 1)
             os.environ[key] = value
 
+print(f"Bucket Name: {TECHRONOMICON_STORAGE_BUCKET_NAME}")
+
 # Use the environment variable for the secret key
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') if os.path.exists(env_path) else get_parameter('DJANGO_SECRET_KEY')
 
