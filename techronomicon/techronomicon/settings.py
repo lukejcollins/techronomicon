@@ -61,7 +61,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['34.244.180.26', 'lukecollins.dev']
+# Get EC2 IP
+TECHRONOMICON_IP = os.environ.get('TECHRONOMICON_IP') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_IP')
+
+ALLOWED_HOSTS = [TECHRONOMICON_IP, 'lukecollins.dev']
 
 
 # Application definition
