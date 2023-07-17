@@ -1,6 +1,6 @@
 name: techronomicon-build-pr
 
-on: workflow_dispatch:
+on: workflow_dispatch
 
 permissions:
   packages: write
