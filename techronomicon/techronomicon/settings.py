@@ -64,7 +64,7 @@ DEBUG = False
 # Get EC2 IP
 TECHRONOMICON_IP = os.environ.get('TECHRONOMICON_IP') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_IP')
 
-ALLOWED_HOSTS = [TECHRONOMICON_IP, 'lukecollins.dev']
+ALLOWED_HOSTS = [TECHRONOMICON_IP, 'lukecollins.dev', 'preprod.lukecollins.dev']
 
 
 # Application definition
