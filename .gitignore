@@ -22,3 +22,6 @@ local_settings.py
 
 # Bash
 .bash_history
+
+# Shell scripts
+*.sh
