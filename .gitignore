@@ -19,7 +19,7 @@ local_settings.py
 # Docker
 .dockerenv*
 *.env
-*.dev
+dev.Dockerfile
 
 # Bash
 .bash_history
