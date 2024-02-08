@@ -1,55 +1,15 @@
-{% load static %}
+{% extends "techronomiblog/base.html" %}
 {% load custom_filters %}
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Techronomicon</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Special Elite', cursive;
-            background-color: white;
-            color: black;
-            text-align: center;
-        }
-        .post {
-            max-width: 60%;
-            margin-left: 20%;
-            padding: 20px;
-	    text-align: left;
-        }
-	.separator {
-    	   border: none;
-           border-top: 1px solid #ccc;
-           margin: 40px auto;
-           width: 30%;
-	}
-	.blog-title {
-	   margin-top: 50px;
-    	   margin-bottom: 50px;
-	}
-	.logo {
-   	   width: 10%;
-    	   margin-bottom: 0.1%;
-	}
-    </style>
-</head>
-<body>
-    <img src="{% static 'techronomiblog/techronomicon-logo.png' %}" alt="Techronomicon Logo" class="logo">
-    <h1 class="blog-title">Techronomicon</h1>
+{% block content %}
     {% for post in posts %}
-    	<div class="post">
+        <div class="post">
             <h2>{{ post.title }}</h2>
-	    <p>{{ post.pub_date|rfc3339 }}</p>
+            <p>{{ post.pub_date|rfc3339 }}</p>
             <p>{{ post.content }}</p>
-	</div>
+        </div>
         {% if not forloop.last %}
             <hr class="separator">
         {% endif %}
     {% endfor %}
-</body>
-</html>
-
+{% endblock %}
