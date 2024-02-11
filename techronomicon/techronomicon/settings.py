@@ -77,6 +77,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'techronomiblog',
+    'markdownx',
+    'markdownify',
 ]
 
 MIDDLEWARE = [
@@ -108,7 +110,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'techronomicon.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
