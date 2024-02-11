@@ -2,8 +2,11 @@
 FROM amazonlinux:latest
 
 # Set environment variables
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+# Accept build-time environment variable to differentiate between dev and prod
+ARG ENVIRONMENT=prod
 
 # Update the package list and install necessary packages
 RUN dnf -y update && \
@@ -22,8 +25,12 @@ USER klaatubaradanikto
 # Set the working directory
 WORKDIR /home/klaatubaradanikto
 
-# Copy project in to Docker container
+# Copy project into Docker container
 COPY techronomicon /home/klaatubaradanikto
 
-# Run server with gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--timeout", "600", "techronomicon.wsgi:application"]
+# Use a conditional statement to run different commands based on the environment
+CMD if [ "$ENVIRONMENT" = "dev" ]; then \
+        python3 manage.py runserver 0.0.0.0:8000; \
+    else \
+        gunicorn --bind 0.0.0.0:8000 --timeout 600 techronomicon.wsgi:application; \
+    fi
