@@ -1,0 +1,11 @@
+{% extends "techronomiblog/base.html" %}
+{% load custom_filters %}
+
+{% block content %}
+    <div class="post">
+        <h2>{{ post.title }}</h2>
+        <p class="pub-date">{{ post.pub_date|rfc3339 }}</p>
+        <p>{{ post.content|safe|linebreaks }}</p>
+        <a href="{% url 'techronomiblog-home' %}">&gt;&gt; Back to Home</a>
+    </div>
+{% endblock %}

@@ -58,8 +58,8 @@ STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+# Check if the .env file exists to determine if we're in a local development environment
+DEBUG = os.path.exists(env_path)
 
 # Get EC2 IP
 TECHRONOMICON_IP = os.environ.get('TECHRONOMICON_IP') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_IP')
