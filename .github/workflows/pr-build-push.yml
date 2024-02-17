@@ -50,9 +50,9 @@ jobs:
           tasks=$(aws ecs list-tasks --cluster ${{ secrets.PREPROD_ECS_CLUSTER_NAME }} --service-name ${{ secrets.PREPROD_ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
           echo "::set-output name=tasks::$tasks"
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
 
       - name: Stop running task
         if: steps.get-running-tasks.outputs.tasks != ''
@@ -62,6 +62,6 @@ jobs:
             aws ecs stop-task --cluster techronomicon-cluster --task $task
           done
         env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
