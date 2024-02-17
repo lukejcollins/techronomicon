@@ -34,7 +34,7 @@ jobs:
 
   update-ecs-service:
     needs: build-and-push
-    if: github.event.pull_request.labels.*.name == 'deploy'
+    if: contains(github.event.pull_request.labels.*.name, 'deploy')
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
@@ -44,8 +44,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.PREPROD_AWS_REGION }}
 
-      - name: Update ECS service
+      - name: Fetch running tasks
+        id: get-running-tasks
         run: |
-          aws ecs update-service --cluster ${{ secrets.PREPROD_ECS_CLUSTER_NAME }} --service ${{ secrets.PREPROD_ECS_SERVICE_NAME }} --force-new-deployment
+          tasks=$(aws ecs list-tasks --cluster ${{ secrets.PREPROD_ECS_CLUSTER_NAME }} --service-name ${{ secrets.PREPROD_ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
+          echo "::set-output name=tasks::$tasks"
         env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
+
+      - name: Stop running task
+        if: steps.get-running-tasks.outputs.tasks != ''
+        run: |
+          for task in ${{ steps.get-running-tasks.outputs.tasks }}
+          do
+            aws ecs stop-task --cluster techronomicon-cluster --task $task
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
