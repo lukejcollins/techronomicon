@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'deploy')
     outputs:
-      should-deploy: ${{ steps.deploy-condition.outputs.result }}
+      should-deploy: ${{ steps.check-deploy.outputs.result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -34,8 +34,8 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/techronomicon:latest
 
-      # Determine if deployment should proceed
-      - id: deploy-condition
+      # Determine if deployment should proceed (dummy step for demonstration)
+      - id: check-deploy
         run: echo "::set-output name=result::true"
 
   update-ecs-service:
@@ -48,10 +48,10 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
-          aws-region: {{ secrets.PREPROD_AWS_REGION }}
+          aws-region: ${{ secrets.PREPROD_AWS_REGION }}
 
       - name: Update ECS service
         run: |
-          aws ecs update-service --cluster {{ secrets.PREPROD_ECS_CLUSTER_NAME}} --service {{ secrets.PREPROD_ECS_SERVICE_NAME }} --force-new-deployment
+          aws ecs update-service --cluster ${{ secrets.PREPROD_ECS_CLUSTER_NAME }} --service ${{ secrets.PREPROD_ECS_SERVICE_NAME }} --force-new-deployment
         env:
-          AWS_DEFAULT_REGION: {{ secrets.PREPROD_AWS_REGION }}
+          AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
