@@ -11,6 +11,8 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'deploy')
+    outputs:
+      should-deploy: ${{ steps.deploy-condition.outputs.result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -31,6 +33,10 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ github.repository }}/techronomicon:latest
+
+      # Determine if deployment should proceed
+      - id: deploy-condition
+        run: echo "::set-output name=result::true"
 
   update-ecs-service:
     needs: build-and-push
