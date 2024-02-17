@@ -44,8 +44,24 @@ jobs:
           aws-secret-access-key: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.PREPROD_AWS_REGION }}
 
-      - name: Update ECS service
+      - name: Fetch running tasks
+        id: get-running-tasks
         run: |
-          aws ecs update-service --cluster ${{ secrets.PREPROD_ECS_CLUSTER_NAME }} --service ${{ secrets.PREPROD_ECS_SERVICE_NAME }} --force-new-deployment
+          tasks=$(aws ecs list-tasks --cluster ${{ secrets.PREPROD_ECS_CLUSTER_NAME }} --service-name ${{ secrets.PREPROD_ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
+          echo "::set-output name=tasks::$tasks"
         env:
-          AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Stop running task
+        if: steps.get-running-tasks.outputs.tasks != ''
+        run: |
+          for task in ${{ steps.get-running-tasks.outputs.tasks }}
+          do
+            aws ecs stop-task --cluster techronomicon-cluster --task $task
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
