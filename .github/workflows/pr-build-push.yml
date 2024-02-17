@@ -11,8 +11,6 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     if: contains(github.event.pull_request.labels.*.name, 'deploy')
-    outputs:
-      should-deploy: ${{ steps.check-deploy.outputs.result }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -34,13 +32,9 @@ jobs:
           push: true
           tags: ghcr.io/${{ github.repository }}/techronomicon:latest
 
-      # Determine if deployment should proceed (dummy step for demonstration)
-      - id: check-deploy
-        run: echo "::set-output name=result::true"
-
   update-ecs-service:
     needs: build-and-push
-    if: needs.build-and-push.outputs.should-deploy == 'true'
+    if: github.event.pull_request.labels.*.name == 'deploy'
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
