@@ -34,6 +34,7 @@ jobs:
 
   update-ecs-service:
     needs: build-and-push
+    
     runs-on: ubuntu-latest
     steps:
       - name: Configure AWS credentials
