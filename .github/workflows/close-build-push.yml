@@ -66,14 +66,23 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.PROD_AWS_REGION }}
 
-  sync-s3-buckets:
-    needs: build-and-push
+  copy-s3-contents:
+    needs: [build-and-push] # This job will need to wait for 'build-and-push' to finish if you have such a dependency
     if: github.event.pull_request.merged == true && contains(github.event.pull_request.labels.*.name, 'deploy')
     runs-on: ubuntu-latest
     steps:
-      - name: Sync S3 buckets
-        run: |
-          aws s3 sync s3://preprod-techronomiconstatic s3://techronomiconstatic --delete
+      - name: Install AWS CLI
+        run: sudo apt-get install awscli
+
+      - name: Download S3 bucket contents
+        run: aws s3 cp s3://preprod-techronomiconstatic ./preprod-techronomiconstatic --recursive
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
+
+      - name: Upload S3 bucket contents
+        run: aws s3 cp ./preprod-techronomiconstatic s3://techronomiconstatic --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
