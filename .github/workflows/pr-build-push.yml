@@ -2,7 +2,7 @@ name: techronomicon-build-pr
 
 on:
   pull_request:
-    types: [opened] # Trigger only when a PR is opened
+    types: [opened, synchronize]
 
 permissions:
   packages: write
