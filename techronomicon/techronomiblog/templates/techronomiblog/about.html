@@ -4,24 +4,7 @@
 
 {% block content %}
     <h1 class="about-title">About</h1>
-    <div class="about-section">
-        <p>
-            Hey! I'm a tech enthusiast with a penchant for simplifying the complex. While my professional life is dedicated to enhancing systems through thoughtful problem solving, this blog is where I share musings, insights, and tidbits from my perception of this space.
-        </p>
-        <p>
-            You won't find just dry technical content here; it's all about the intersection of technology with our daily lives. From automation that saves precious time to the latest in open source, I delve into topics that matter to both tech heads and the tech-curious alike.
-        </p>
-        <p>
-            When not immersed in the digi-sphere, I indulge in the beauty of music, the joy of board games with friends, and the thrill of travelling the world. These pursuits not only provide a balance but often inspire fresh perspectives for the digital world.
-        </p>
-        <p>
-            This blog is a conduit for sharing knowledge, exchanging ideas, and sparking conversations. If something piques your interest, feel free to reach out. I'm always up for a good discussion or a collaborative project.
-        </p>
-        <p>
-            Dive into my <a href="https://github.com/lukejcollins" target="_blank" rel="noopener noreferrer">Github</a> to see what I've been tinkering with or get in touch through <a href="mailto:luke@lukecollins.dev">email</a>. If you're intrigued by the mechanics behind this blog, the open-sourced application can be found <a href="https://github.com/lukejcollins/techronomicon" target="_blank" rel="noopener noreferrer">here</a>, and the infrastructure that powers it is detailed <a href="https://github.com/lukejcollins/techronomicon-infra" target="_blank" rel="noopener noreferrer">here</a>.
-        </p>
-    </div>
-    <br>
+    {{ about_page.content }}
     <style>
       .libutton {
         display: flex;

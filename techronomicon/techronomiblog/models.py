@@ -11,3 +11,6 @@ class Post(models.Model):
 
     def __str__(self):
         return self.title
+
+class AboutPage(models.Model):
+    content = models.TextField()
