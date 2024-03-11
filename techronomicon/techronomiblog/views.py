@@ -15,6 +15,7 @@ def home(request):
 
 def about(request):
     about_page = AboutPage.objects.first()
+    about_page.content = markdownify(about_page.content)
     return render(request, 'techronomiblog/about.html', {'about_page': about_page})
 
 def post_detail(request, post_id):

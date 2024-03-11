@@ -13,4 +13,4 @@ class Post(models.Model):
         return self.title
 
 class AboutPage(models.Model):
-    content = models.TextField()
+    content = MarkdownxField()

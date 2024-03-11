@@ -4,7 +4,7 @@
 
 {% block content %}
     <h1 class="about-title">About</h1>
-    {{ about_page.content }}
+    {{ about_page.content|safe|linebreaks }}
     <style>
       .libutton {
         display: flex;
