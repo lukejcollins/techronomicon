@@ -4,7 +4,9 @@
 
 {% block content %}
     <h1 class="about-title">About</h1>
+    <div class="about-section">
     {{ about_page.content|safe|linebreaks }}
+    </div>
     <style>
       .libutton {
         display: flex;
@@ -21,5 +23,6 @@
         font-family: "SF Pro Text", Helvetica, sans-serif;
       }
     </style>
+    <br>
     <a class="libutton" href="https://www.linkedin.com/comm/mynetwork/discovery-see-all?usecase=PEOPLE_FOLLOWS&followMember=luke-j-collins" target="_blank">Follow on LinkedIn</a>
 {% endblock %}
