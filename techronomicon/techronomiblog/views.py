@@ -2,6 +2,7 @@ from django.shortcuts import render
 from .models import Post
 from markdownx.utils import markdownify
 from django.shortcuts import render, get_object_or_404
+from .models import AboutPage
 
 def home(request):
     posts = Post.objects.order_by('-pub_date')
@@ -13,7 +14,9 @@ def home(request):
     return render(request, 'techronomiblog/home.html', {'posts': posts})
 
 def about(request):
-    return render(request, 'techronomiblog/about.html')
+    about_page = AboutPage.objects.first()
+    about_page.content = markdownify(about_page.content)
+    return render(request, 'techronomiblog/about.html', {'about_page': about_page})
 
 def post_detail(request, post_id):
     post = get_object_or_404(Post, pk=post_id)
