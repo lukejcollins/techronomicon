@@ -23,6 +23,15 @@
     <link rel="mask-icon" href="{% static 'techronomiblog/safari-pinned-tab.svg' %}" color="#5bbad5">
     <meta name="msapplication-TileColor" content="#da532c">
     <meta name="theme-color" content="#ffffff">
+    {% if post.og_title %}
+    <meta property="og:title" content="{{ post.og_title }}">
+    {% endif %}
+    {% if post.og_description %}
+    <meta property="og:description" content="{{ post.og_description }}">
+    {% endif %}
+    {% if post.og_image %}
+    <meta property="og:image" content="{{ post.og_image.url }}">
+    {% endif %}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">

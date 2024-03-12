@@ -3,7 +3,10 @@ from .models import Post
 from markdownx.admin import MarkdownxModelAdmin
 from .models import AboutPage
 
-admin.site.register(Post, MarkdownxModelAdmin)
+class PostAdmin(MarkdownxModelAdmin):
+    fields = ('title', 'content', 'og_title', 'og_description', 'og_image')
+
+admin.site.register(Post, PostAdmin)
 
 class AboutPageAdmin(MarkdownxModelAdmin):
     def has_add_permission(self, request):
