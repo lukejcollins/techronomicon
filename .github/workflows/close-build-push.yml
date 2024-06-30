@@ -75,14 +75,14 @@ jobs:
         run: sudo apt-get install awscli
 
       - name: Download S3 bucket contents
-        run: aws s3 cp s3://preprod-techronomiconstatic ./preprod-techronomiconstatic --recursive
+        run: aws s3 cp s3://${{ secrets.PREPROD_TECHRONOMICON_STORAGE_BUCKET_NAME }} ./preprod-techronomiconstatic --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PREPROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PREPROD_AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.PREPROD_AWS_REGION }}
 
       - name: Upload S3 bucket contents
-        run: aws s3 cp ./preprod-techronomiconstatic s3://techronomiconstatic --recursive
+        run: aws s3 cp ./preprod-techronomiconstatic s3://${{ secrets.TECHRONOMICON_STORAGE_BUCKET_NAME }} --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.PROD_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.PROD_AWS_SECRET_ACCESS_KEY }}
