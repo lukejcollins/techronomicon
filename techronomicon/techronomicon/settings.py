@@ -64,7 +64,7 @@ DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Check if the .env file exists to determine if we're in a local development environment
-DEBUG = os.path.exists(env_path)
+DEBUG = True
 
 # Get EC2 IP
 TECHRONOMICON_IP = os.environ.get('TECHRONOMICON_IP') if os.path.exists(env_path) else get_parameter('TECHRONOMICON_IP')
