@@ -140,7 +140,7 @@ jobs:
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
   copy-s3-contents-preprod:
-    needs: update-ecs-service-preprod
+    needs: update-ecs-service-prod
     if: github.event.action == 'closed' && github.event.pull_request.merged == true  # Run only if the PR is merged
     runs-on: ubuntu-latest
     environment: preprod
