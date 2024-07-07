@@ -1,4 +1,4 @@
-[![Django](https://img.shields.io/badge/Django-Web%20Framework-092E20?logo=django&logoColor=white&labelColor=092E20&color=white)](https://www.djangoproject.com/) [![Docker](https://img.shields.io/badge/Docker-Containerisation-2496ED?logo=docker&logoColor=white&labelColor=2496ED&color=white)](https://www.docker.com/) ![Deployment](https://github.com/lukejcollins/techronomicon/actions/workflows/pr-build-push.yml/badge.svg)
+[![Django](https://img.shields.io/badge/Django-Web%20Framework-092E20?logo=django&logoColor=white&labelColor=092E20&color=white)](https://www.djangoproject.com/) [![Docker](https://img.shields.io/badge/Docker-Containerisation-2496ED?logo=docker&logoColor=white&labelColor=2496ED&color=white)](https://www.docker.com/) ![Deployment](https://github.com/lukejcollins/techronomicon/actions/workflows/deploy.yml/badge.svg)
 
 
 
