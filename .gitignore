@@ -26,3 +26,6 @@ Dockerfile.dev
 
 # Shell scripts
 *.sh
+
+# Tmp files
+*.tmp
