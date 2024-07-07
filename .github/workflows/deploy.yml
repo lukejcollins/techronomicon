@@ -72,6 +72,31 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
+      - name: Check for available container instances
+        id: check-instances
+        run: |
+          available_instances=$(aws ecs list-container-instances --cluster ${{ secrets.ECS_CLUSTER_NAME }} --query 'containerInstanceArns' --output text)
+          if [ -z "$available_instances" ]; then
+            echo "No container instances available. Exiting."
+            exit 1
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Wait for available container instances
+        if: steps.check-instances.outputs.available_instances == ''
+        run: |
+          while [[ $(aws ecs list-container-instances --cluster ${{ secrets.ECS_CLUSTER_NAME }} --query 'containerInstanceArns' --output text) == '' ]]; do
+            echo "Waiting for available container instances..."
+            sleep 10
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
       - name: Update ECS Service and set desired count to 1
         run: |
           aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --desired-count 1 --force-new-deployment
