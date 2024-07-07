@@ -53,23 +53,53 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Fetch running tasks
-        id: get-running-tasks
+      - name: Set desired count to 0
         run: |
-          tasks=$(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service-name ${{ secrets.ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
-          echo "::set-output name=tasks::$tasks"
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --desired-count 0
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Stop running task
-        if: steps.get-running-tasks.outputs.tasks != ''
+      - name: Wait for tasks to stop
         run: |
-          for task in ${{ steps.get-running-tasks.outputs.tasks }}
-          do
-            aws ecs stop-task --cluster ${{ secrets.ECS_CLUSTER_NAME }} --task $task
+          while [[ $(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service-name ${{ secrets.ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text) != "" ]]; do
+            echo "Waiting for tasks to stop..."
+            sleep 10
           done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Check for available container instances
+        id: check-instances
+        run: |
+          available_instances=$(aws ecs list-container-instances --cluster ${{ secrets.ECS_CLUSTER_NAME }} --query 'containerInstanceArns' --output text)
+          if [ -z "$available_instances" ]; then
+            echo "No container instances available. Exiting."
+            exit 1
+          fi
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Wait for available container instances
+        if: steps.check-instances.outputs.available_instances == ''
+        run: |
+          while [[ $(aws ecs list-container-instances --cluster ${{ secrets.ECS_CLUSTER_NAME }} --query 'containerInstanceArns' --output text) == '' ]]; do
+            echo "Waiting for available container instances..."
+            sleep 10
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Update ECS Service and set desired count to 1
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --desired-count 1 --force-new-deployment
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -82,25 +112,20 @@ jobs:
     environment: production
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.ACTIONS_PAT }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Build and push
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          push: true
-          tags: ghcr.io/${{ github.repository }}/techronomicon:latest
+      - name: Update ECS Service
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
   update-ecs-service-prod:
     needs: build-and-push-prod
@@ -117,23 +142,71 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - name: Fetch running tasks
-        id: get-running-tasks
+      - name: Set desired count to 0
         run: |
-          tasks=$(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service-name ${{ secrets.ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
-          echo "::set-output name=tasks::$tasks"
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --desired-count 0
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
 
-      - name: Stop running task
-        if: steps.get-running-tasks.outputs.tasks != ''
+      - name: Wait for tasks to stop
         run: |
-          for task in ${{ steps.get-running-tasks.outputs.tasks }}
-          do
-            aws ecs stop-task --cluster ${{ secrets.ECS_CLUSTER_NAME }} --task $task
+          while [[ $(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service-name ${{ secrets.ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text) != "" ]]; do
+            echo "Waiting for tasks to stop..."
+            sleep 10
           done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Update ECS Service and set desired count to 1
+        run: |
+          aws ecs update-service --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service ${{ secrets.ECS_SERVICE_NAME }} --desired-count 1 --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+  copy-s3-contents-preprod:
+    needs: update-ecs-service-prod
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true  # Run only if the PR is merged
+    runs-on: ubuntu-latest
+    environment: preprod
+
+    steps:
+      - name: Install AWS CLI
+        run: sudo apt-get install -y awscli
+
+      - name: Download S3 bucket contents
+        run: aws s3 cp s3://${{ secrets.TECHRONOMICON_STORAGE_BUCKET_NAME }} ./preprod-techronomiconstatic --recursive
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Upload S3 bucket contents as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: preprod-techronomiconstatic
+          path: ./preprod-techronomiconstatic
+
+  copy-s3-contents-prod:
+    needs: copy-s3-contents-preprod
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true  # Run only if the PR is merged
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Download S3 bucket contents artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: preprod-techronomiconstatic
+          path: ./preprod-techronomiconstatic
+
+      - name: Upload S3 bucket contents
+        run: aws s3 cp ./preprod-techronomiconstatic s3://${{ secrets.TECHRONOMICON_STORAGE_BUCKET_NAME }} --recursive
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
