@@ -1,0 +1,140 @@
+name: techronomicon-build-pr
+
+on:
+  pull_request:
+    types: [opened, synchronize, closed]
+    paths:
+      - 'techronomicon/**'
+      - 'Dockerfile'
+
+permissions:
+  packages: write
+
+jobs:
+  build-and-push-preprod:
+    if: github.event.action != 'closed'  # Run only if the PR is not closed
+    name: 'Build and Push to Preprod'
+    runs-on: ubuntu-latest
+    environment: preprod
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.ACTIONS_PAT }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/techronomicon:preprod
+
+  update-ecs-service-preprod:
+    needs: build-and-push-preprod
+    if: github.event.action != 'closed'  # Run only if the PR is not closed
+    name: 'Update ECS Service in Preprod'
+    runs-on: ubuntu-latest
+    environment: preprod
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Fetch running tasks
+        id: get-running-tasks
+        run: |
+          tasks=$(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service-name ${{ secrets.ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
+          echo "::set-output name=tasks::$tasks"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Stop running task
+        if: steps.get-running-tasks.outputs.tasks != ''
+        run: |
+          for task in ${{ steps.get-running-tasks.outputs.tasks }}
+          do
+            aws ecs stop-task --cluster ${{ secrets.ECS_CLUSTER_NAME }} --task $task
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+  build-and-push-prod:
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true  # Run only if the PR is closed and merged
+    name: 'Build and Push to Production'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.ACTIONS_PAT }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/techronomicon:latest
+
+  update-ecs-service-prod:
+    needs: build-and-push-prod
+    if: github.event.action == 'closed' && github.event.pull_request.merged == true  # Run only if the PR is closed and merged
+    name: 'Update ECS Service in Production'
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Fetch running tasks
+        id: get-running-tasks
+        run: |
+          tasks=$(aws ecs list-tasks --cluster ${{ secrets.ECS_CLUSTER_NAME }} --service-name ${{ secrets.ECS_SERVICE_NAME }} --desired-status RUNNING --query 'taskArns' --output text)
+          echo "::set-output name=tasks::$tasks"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
+
+      - name: Stop running task
+        if: steps.get-running-tasks.outputs.tasks != ''
+        run: |
+          for task in ${{ steps.get-running-tasks.outputs.tasks }}
+          do
+            aws ecs stop-task --cluster ${{ secrets.ECS_CLUSTER_NAME }} --task $task
+          done
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: ${{ secrets.AWS_REGION }}
