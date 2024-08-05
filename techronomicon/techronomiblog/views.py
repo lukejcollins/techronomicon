@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from .models import Post
-from markdownx.utils import markdownify
+from markdownx.utils import markdownify  # type: ignore
 from django.shortcuts import render, get_object_or_404
 from .models import AboutPage
 
