@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import Post
-from markdownx.admin import MarkdownxModelAdmin
+from markdownx.admin import MarkdownxModelAdmin  # type: ignore
 from .models import AboutPage
 
 class PostAdmin(MarkdownxModelAdmin):
