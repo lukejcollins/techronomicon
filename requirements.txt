@@ -1,0 +1,7 @@
+Django>=4.2,<5
+gunicorn>=21
+psycopg[binary]>=3.2
+whitenoise>=6
+django-markdownx>=4
+django-markdownify>=0.9.5
+bleach>=6

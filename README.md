@@ -1,45 +1,112 @@
-[![Django](https://img.shields.io/badge/Django-Web%20Framework-092E20?logo=django&logoColor=white&labelColor=092E20&color=white)](https://www.djangoproject.com/) [![Docker](https://img.shields.io/badge/Docker-Containerisation-2496ED?logo=docker&logoColor=white&labelColor=2496ED&color=white)](https://www.docker.com/) ![Deployment](https://github.com/lukejcollins/techronomicon/actions/workflows/deploy.yml/badge.svg)
+[![Django](https://img.shields.io/badge/Django-Web%20Framework-092E20?logo=django&logoColor=white&labelColor=092E20&color=white)](https://www.djangoproject.com/) [![Docker](https://img.shields.io/badge/Docker-Containerisation-2496ED?logo=docker&logoColor=white&labelColor=2496ED&color=white)](https://www.docker.com/) ![Build](https://github.com/lukejcollins/techronomicon/actions/workflows/deploy.yml/badge.svg)
 
+# Techronomicon
 
+A small Django-powered blog. This repository contains the Django project, a blog app, and a container build that runs the site with Gunicorn and WhiteNoise.
 
+This README focuses on the application and the image build process in isolation (no external orchestration).
 
-# Techronomicon 🧙‍♂️🔮
+## Overview
 
-Welcome to the Techronomicon, a mystical portal where technology meets the arcane! Techronomicon will be a tech blog focused on Immutable OSs, cloud infrastructure and a blend of other esoteric miscellanea. Our words of power are weaved with Python and Django, while our scrolls are stored in the great libraries of AWS. 🌩️📚
+- Framework: Django 4.x
+- App: `techronomiblog` (posts and about page)
+- WSGI: Gunicorn
+- Static files: WhiteNoise (`collectstatic` runs at container start)
+- Database: PostgreSQL (via `psycopg`)
+- Health check: `GET /healthz` returns `ok`
 
-## Current State of the Repository 🌒
+Project layout:
 
-As of now, the mighty spellbook contains the basic foundation of a Django project and a Dockerfile. These ancient scrolls are only the beginning:
+- `techronomicon/` – Django project and blog app
+- `Dockerfile` – multi-stage Python 3.12 image
+- `requirements.txt` – Python dependencies
+- `.env` – local development environment variables
+- `.env.docker` – container-friendly environment variables
 
-- The **Dockerfile** is capable of conjuring a container that can run the Django site. It’s just a prototype and will evolve as the secrets of the arcane get unraveled.
-  
-- The **Django project** is in its nascent form, resembling an alchemist’s first draft of a potion. It currently holds a basic blog page, as if peering through a looking glass into a world yet to be fully formed. 
+## Environment variables
 
-Remember, fellow practitioner, that these are mere beginnings. As the moon goes through its phases, so will Techronomicon. Through the coming weeks and months, we will embark on a mystical journey, adding new spells, summoning new entities, and drawing from the well of ancient knowledge.🌟
+The application is configured via environment variables (and can optionally load `.env` when `LOAD_DOTENV=true`). Required variables:
 
-## The Path Forward 🕯️
+- `SECRET_KEY` – Django secret key
+- `DEBUG` – `true|false`
+- `HOST` – logical host name for the app
+- `ALLOWED_HOSTS` – comma-separated hostnames (e.g. `localhost,127.0.0.1`)
+- `CSRF_TRUSTED_ORIGINS` – comma-separated origins (e.g. `http://localhost,http://127.0.0.1`)
+- `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD` – PostgreSQL settings
+- `LOAD_DOTENV` – set to `true` to read `.env` (optional)
 
-As we traverse the treacherous path of development, Techronomicon will be imbued with spells from various mystical sources. Our prime focus will be:
+See `.env` and `.env.docker` for working examples.
 
-- **Immutable Operating Environments**: Learn the art of unchanging, stable environments where the essence of the system is locked in time.
+## Local development (without Docker)
 
-- **Cloud Infrastructure in AWS**: Soar through the clouds and harness the power of AWS, where you can summon and bind elemental forces at will.
+Prerequisites: Python 3.12+, PostgreSQL
 
-- **Esoteric and Mystical Verses**: Unearth hidden knowledge and secrets, melding tech and arcane wisdom in cryptic verses, but with a hint of jest.
+1) Create and activate a virtual environment
 
-## Tools & Technology 🧰
+```
+python -m venv .venv
+source .venv/bin/activate
+```
 
-- **Django**: A powerful Python web framework which will be used for weaving the spells into web forms.
-- **Docker**: Conjure isolated environments in containers, easily reproducible by other mystics.
-- **AWS**: The grand library of Amazon Web Services, where our incantations will take physical form.
+2) Install dependencies
 
-## How to Contribute 🤝
+```
+pip install -r requirements.txt
+```
 
-Are you a sorcerer, warlock, or witch with knowledge to share? Contribute your spells, charms, and incantations to Techronomicon. Raise issues, submit pull requests, and join us in creating the most mystical tech blog in the realm.
+3) Configure environment
 
-## Notes for Apprentices 📜
+Set variables from `.env` (or export them in your shell). Ensure PostgreSQL is available and the database exists.
 
-This is an educational endeavor. As we craft our spells, we’ll learn and grow. This space is not only for the experienced warlocks but also for the young wizards who are just starting to discover their powers.
+4) Run migrations and start the dev server
 
-In stars and clouds,
-Techronomicon 🧙🌩️
+```
+python techronomicon/manage.py migrate
+python techronomicon/manage.py runserver 0.0.0.0:8000
+```
+
+Visit `http://localhost:8000` and `http://localhost:8000/healthz`.
+
+## Docker build and run
+
+Build the image:
+
+```
+docker build -t techronomicon:dev .
+```
+
+Run database migrations (one-off) using the image:
+
+```
+docker run --rm \
+  --env-file .env.docker \
+  --entrypoint python \
+  techronomicon:dev techronomicon/manage.py migrate
+```
+
+Run the application:
+
+```
+docker run --rm -p 8000:8000 \
+  --env-file .env.docker \
+  techronomicon:dev
+```
+
+Notes
+
+- The container executes `/app/entrypoint.py`, which runs `collectstatic` and starts Gunicorn on port 8000.
+- Ensure the PostgreSQL instance referenced by `.env.docker` is reachable (e.g. `DB_HOST=host.docker.internal` on macOS/Windows).
+
+## Continuous integration (build only)
+
+GitHub Actions builds the Docker image from the repository and can push it to GitHub Container Registry (GHCR). The workflow lives under `.github/workflows/` and the badge above reflects its status.
+
+Typical tags to publish include a commit-SHA tag and `latest` for the default branch.
+
+## Contributing
+
+Issues and PRs are welcome. Please keep changes focused and include clear steps to test where possible.
+
+## License
+
+See `LICENSE`.
