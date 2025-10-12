@@ -1,36 +1,27 @@
-# Use the latest Amazon Linux image
-FROM amazonlinux:latest
+FROM python:3.12-slim AS build
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PIP_NO_CACHE_DIR=1
+WORKDIR /app
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
+COPY requirements.txt .
+COPY techronomicon /app
+COPY techronomicon/entrypoint.py /app/entrypoint.py
 
-# Accept build-time environment variable to differentiate between dev and prod
-ARG ENVIRONMENT=prod
+RUN pip install -r requirements.txt && \
+    chmod +x /app/entrypoint.py && \
+    mkdir -p /app/media
 
-# Update the package list and install necessary packages
-RUN dnf -y update && \
-    dnf -y install python3 python3-pip git iputils && \
-    dnf clean all
+FROM python:3.12-slim AS runtime
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+WORKDIR /app
 
-# Install pip packages
-RUN pip3 install django boto3 django-storages psycopg2-binary gunicorn django-markdownx django-markdownify
+RUN useradd -u 999 -r -s /usr/sbin/nologin appuser && \
+    mkdir -p /app && \
+    chown -R 999:999 /app
 
-# Create a non-root user
-RUN adduser klaatubaradanikto
+COPY --from=build /usr/local /usr/local
+COPY --from=build /app /app
 
-# Switch to the non-root user
-USER klaatubaradanikto
-
-# Set the working directory
-WORKDIR /home/klaatubaradanikto
-
-# Copy project into Docker container
-COPY techronomicon /home/klaatubaradanikto
-
-# Use a conditional statement to run different commands based on the environment
-CMD if [ "$ENVIRONMENT" = "dev" ]; then \
-        python3 manage.py runserver 0.0.0.0:8000; \
-    else \
-        gunicorn --bind 0.0.0.0:8000 --timeout 600 techronomicon.wsgi:application; \
-    fi
+ENV DJANGO_SETTINGS_MODULE=techronomicon.settings
+USER 999:999
+EXPOSE 8000
+CMD ["/app/entrypoint.py"]

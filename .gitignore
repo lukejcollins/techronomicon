@@ -1,31 +1,36 @@
 # Python
 __pycache__/
 *.py[cod]
-*.pyd
 *.pyo
+*.pyd
 *.so
+*.tmp
+*.log
+*.sqlite3
 .Python
 env/
 venv/
-*.sqlite3
+.venv/
+.pyvenv.cfg
 
-# Django
-*.log
-.static_storage/
-.media/
-local_settings.py
-**/static/
+# Django build output
+staticfiles/
+media/
+.local_settings.py
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
 
 # Docker
 .dockerenv*
-*.env
 Dockerfile.dev
+
+# IDE / tools
+.vscode/
+.idea/
+.DS_Store
 
 # Bash
 .bash_history
-
-# Shell scripts
-*.sh
-
-# Tmp files
-*.tmp
